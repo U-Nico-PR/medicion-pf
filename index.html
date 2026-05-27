@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Puntos de Función (APF)</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Estimador de Puntos de Función (IFPUG)</h1>
+        <p>Herramienta de análisis y estimación de software basada en arquitectura limpia.</p>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <h2>1. Funciones de Datos y Transacciones</h2>
+            <form id="function-form">
+                <div class="grid-form">
+                    <div class="form-group">
+                        <label for="func-name">Nombre del Componente:</label>
+                        <input type="text" id="func-name" placeholder="Ej. Consultar Proveedores" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="func-type">Tipo de Función:</label>
+                        <select id="func-type" required>
+                            <option value="ILF">ILF (Archivo Lógico Interno)</option>
+                            <option value="EIF">EIF (Archivo de Interfaz Externa)</option>
+                            <option value="EI">EI (Entrada Externa)</option>
+                            <option value="EO">EO (Salida Externa)</option>
+                            <option value="EQ">EQ (Consulta Externa)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label id="label-ret-ftr" for="func-ret-ftr">RETs / FTRs:</label>
+                        <input type="number" id="func-ret-ftr" min="0" value="1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="func-det">DETs (Atributos):</label>
+                        <input type="number" id="func-det" min="1" value="1" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Agregar Función</button>
+            </form>
+
+            <div class="table-responsive">
+                <table id="functions-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Tipo</th>
+                            <th>RET/FTR</th>
+                            <th>DET</th>
+                            <th>Complejidad</th>
+                            <th>PF No Ajustados</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>2. Características Generales del Sistema (GSC)</h2>
+            <p class="subtitle">Evalúa cada factor de 0 (Inexistente) a 5 (Esencial)</p>
+            <div id="gsc-container" class="grid-gsc">
+                </div>
+        </section>
+
+        <section class="card summary-card">
+            <h2>3. Resumen de la Estimación</h2>
+            <div class="grid-results">
+                <div class="result-box">
+                    <span class="result-label">Puntos de Función No Ajustados (PFNA):</span>
+                    <span id="total-ufp" class="result-value">0</span>
+                </div>
+                <div class="result-box">
+                    <span class="result-label">Características Generales del Sistema (GSC):</span>
+                    <span id="total-gsc" class="result-value">0</span>
+                </div>
+                <div class="result-box">
+                    <span class="result-label">Factor de Ajuste de Valor (VAF):</span>
+                    <span id="total-vaf" class="result-value">0.65</span>
+                </div>
+                <div class="result-box total-highlight">
+                    <span class="result-label">Puntos de Función Ajustados (PFA):</span>
+                    <span id="total-afp" class="result-value">0</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js" type="module"></script>
+</body>
+</html>
