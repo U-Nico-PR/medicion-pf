@@ -82,11 +82,47 @@ function calcularTotales() {
     // 4. Puntos de Función Ajustados (PFA)
     const pfa = pfna * vaf;
 
-    // Renderizar en UI
+    // === CÁLCULOS ADICIONALES DE ESTIMACIÓN ===
+    const productividad = parseFloat(document.getElementById('proj-prod').value) || 0;
+    const costoHora = parseFloat(document.getElementById('proj-cost').value) || 0;
+    
+    // Esfuerzo = PFA * Productividad (Horas totales requeridas)
+    const esfuerzo = pfa * productividad;
+    const costoTotal = esfuerzo * costoHora;
+
+    // Inputs condicionales del usuario
+    const inputPersonas = document.getElementById('proj-team').value;
+    const inputMeses = document.getElementById('proj-months').value;
+
+    let duracionTexto = "Falta definir personal";
+    let personalTexto = "Falta definir duración";
+
+    // Si el usuario ingresó Cantidad de Personas -> Calculamos duración en meses
+    if (inputPersonas && !isNaN(inputPersonas) && parseInt(inputPersonas) > 0) {
+        const numPersonas = parseInt(inputPersonas);
+        const mesesCalculados = esfuerzo / (numPersonas * 160);
+        duracionTexto = `${mesesCalculados.toFixed(1)} Meses`;
+        personalTexto = `${numPersonas} Persona(s) [Fijado]`;
+    } 
+    // Si el usuario ingresó Duración en Meses (Entero) -> Calculamos cantidad de personas
+    else if (inputMeses && !isNaN(inputMeses) && parseInt(inputMeses) > 0) {
+        const numMeses = parseInt(inputMeses);
+        const personasCalculadas = esfuerzo / (numMeses * 160);
+        personalTexto = `${personasCalculadas.toFixed(1)} Personas`;
+        duracionTexto = `${numMeses} Mes(es) [Fijado]`;
+    }
+
+    // === RENDERIZAR EN INTERFAZ DE USUARIO (MODAL) ===
     document.getElementById('total-ufp').textContent = pfna;
-    document.getElementById('total-gsc').textContent = sumGsc;
+    document.getElementById('total-gsc-sum').textContent = sumGsc; 
     document.getElementById('total-vaf').textContent = vaf.toFixed(2);
     document.getElementById('total-afp').textContent = pfa.toFixed(2);
+
+    // Renderizar métricas del negocio
+    document.getElementById('res-esfuerzo').textContent = `${esfuerzo.toFixed(1)} hrs`;
+    document.getElementById('res-costo').textContent = `$${costoTotal.toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    document.getElementById('res-duracion').textContent = duracionTexto;
+    document.getElementById('res-personal').textContent = personalTexto;
 }
 
 // ==========================================
@@ -122,8 +158,13 @@ function setupEventos() {
     const tipoSelect = document.getElementById('func-type');
     const labelRetFtr = document.getElementById('label-ret-ftr');
     const form = document.getElementById('function-form');
+    
+    // Componentes del Modal
+    const modal = document.getElementById('result-modal');
+    const btnOpenModal = document.getElementById('btn-open-modal');
+    const modalClose = document.querySelector('.modal-close');
 
-    // Cambiar etiquetas dinámicamente según la selección
+    // Cambiar etiquetas dinámicamente según el tipo de función
     tipoSelect.addEventListener('change', (e) => {
         const tipo = e.target.value;
         if (tipo === 'ILF' || tipo === 'EIF') {
@@ -133,14 +174,31 @@ function setupEventos() {
         }
     });
 
-    // Evento para escuchar cambios en las GSC y actualizar totales al instante
-    document.getElementById('gsc-container').addEventListener('change', (e) => {
-        if (e.target.classList.contains('gsc-select')) {
-            calcularTotales();
+    // Control mutuo de los inputs condicionales (limpiar el opuesto para evitar conflictos)
+    document.getElementById('proj-team').addEventListener('input', () => {
+        document.getElementById('proj-months').value = '';
+    });
+    document.getElementById('proj-months').addEventListener('input', () => {
+        document.getElementById('proj-team').value = '';
+    });
+
+    // Eventos para abrir y cerrar la ventana emergente (Modal)
+    btnOpenModal.addEventListener('click', () => {
+        calcularTotales(); // Ejecuta los cálculos con la información actual
+        modal.style.display = 'flex'; // Muestra la ventana
+    });
+
+    modalClose.addEventListener('click', () => {
+        modal.style.display = 'none'; // Cierra la ventana
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none'; // Cierra haciendo clic fuera del cuadro
         }
     });
 
-    // Manejar envío de formulario de nuevas funciones
+    // Manejar el envío del formulario de componentes
     form.addEventListener('submit', (e) => {
         e.preventDefault();
 
@@ -149,17 +207,13 @@ function setupEventos() {
         const retFtr = parseInt(document.getElementById('func-ret-ftr').value);
         const det = parseInt(document.getElementById('func-det').value);
 
-        // Invocar reglas de negocio
         const { complejidad, puntos } = calcularComplejidadYPuntos(tipo, retFtr, det);
 
         const nuevaFuncion = { id: Date.now(), nombre, tipo, retFtr, det, complejidad, puntos };
         funcionesAgregadas.push(nuevaFuncion);
 
         renderTablas();
-        calcularTotales();
         form.reset();
-        
-        // Mantener coherencia en el label tras el reset
         tipoSelect.dispatchEvent(new Event('change'));
     });
 }
